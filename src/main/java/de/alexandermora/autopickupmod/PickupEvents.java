@@ -40,7 +40,13 @@ public final class PickupEvents {
         );
 
         for (ItemEntity itemEntity : nearbyItems) {
-            ItemStack toInsert = itemEntity.getItem().copy();
+            ItemStack stack = itemEntity.getItem();
+
+            if (BlacklistHelper.isBlacklisted(stack)) {
+                continue;
+            }
+
+            ItemStack toInsert = stack.copy();
             int before = toInsert.getCount();
 
             boolean inserted = player.getInventory().add(toInsert);

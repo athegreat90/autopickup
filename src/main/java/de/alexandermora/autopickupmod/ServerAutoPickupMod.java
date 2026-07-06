@@ -10,12 +10,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static net.neoforged.fml.config.ModConfig.*;
+import static net.neoforged.fml.config.ModConfig.Type;
 
 @Mod(ServerAutoPickupMod.MODID)
 public class ServerAutoPickupMod {
     public static final String MODID = "autopickupmod";
-
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
     public ServerAutoPickupMod(IEventBus modBus, ModContainer modContainer) {
@@ -27,8 +26,6 @@ public class ServerAutoPickupMod {
             throw new RuntimeException("Could not create config folder: " + folder, e);
         }
 
-
-        modContainer.registerConfig(Type.SERVER, ModConfig.SPEC);
         modContainer.registerConfig(Type.SERVER, ModConfig.SPEC, "autopickup/autopickup-server.toml");
         modBus.register(ConfigEvents.class);
     }

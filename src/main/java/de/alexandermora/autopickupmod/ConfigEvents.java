@@ -11,8 +11,9 @@ public final class ConfigEvents {
     public static void onConfigLoading(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() == ModConfig.SPEC) {
             ModConfig.cachedPickupRange = ModConfig.PICKUP_RANGE.get();
-            ServerAutoPickupMod.LOGGER.info("Pickup range loaded: {}", ModConfig.cachedPickupRange);
+            BlacklistHelper.rebuildCache();
 
+            ServerAutoPickupMod.LOGGER.info("Pickup range loaded: {} and blacklist: OK", ModConfig.cachedPickupRange);
         }
     }
 
@@ -20,8 +21,9 @@ public final class ConfigEvents {
     public static void onConfigReloading(ModConfigEvent.Reloading event) {
         if (event.getConfig().getSpec() == ModConfig.SPEC) {
             ModConfig.cachedPickupRange = ModConfig.PICKUP_RANGE.get();
-            ServerAutoPickupMod.LOGGER.info("Pickup range reloaded: {}", ModConfig.cachedPickupRange);
+            BlacklistHelper.rebuildCache();
 
+            ServerAutoPickupMod.LOGGER.info("Pickup range reloaded: {} and blacklist: OK", ModConfig.cachedPickupRange);
         }
     }
 }
