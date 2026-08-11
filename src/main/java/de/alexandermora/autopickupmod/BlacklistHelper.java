@@ -1,14 +1,14 @@
 package de.alexandermora.autopickupmod;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 import java.util.Set;
 
 public final class BlacklistHelper {
@@ -17,62 +17,35 @@ public final class BlacklistHelper {
 
     public static void rebuildCache() {
         List<? extends String> configured = ModConfig.BLACKLISTED_ITEMS.get();
-        Set<String> normalized = new HashSet<>();
         Set<Item> resolved = new HashSet<>();
 
-        for (String raw : configured) {
-            if (raw == null) {
+        for (var raw : configured) {
+            if (raw == null || raw.isBlank()) {
                 continue;
             }
 
-            String id = raw.trim().toLowerCase();
-            if (!id.contains(":")) {
-                ServerAutoPickupMod.LOGGER.warn("Invalid blacklisted item id: {}", raw);
-                continue;
-            }
+            var normalized = raw.trim().toLowerCase(Locale.ROOT);
 
-            normalized.add(id);
-        }
+            try {
+                var id = Identifier.parse(normalized);
 
-        for (Item item : BuiltInRegistries.ITEM) {
-            Optional<ResourceKey<Item>> keyOpt = BuiltInRegistries.ITEM.getResourceKey(item);
+                if (!BuiltInRegistries.ITEM.containsKey(id)) {
+                    ServerAutoPickupMod.LOGGER.warn("Unknown blacklisted item id: {}", raw);
+                    continue;
+                }
 
-            if (keyOpt.isEmpty()) {
-                continue;
-            }
-
-            String registryName = extractRegistryName(keyOpt.get());
-            if (registryName == null) {
-                continue;
-            }
-
-            if (normalized.contains(registryName)) {
+                var item = BuiltInRegistries.ITEM.getValue(id);
                 resolved.add(item);
+            } catch (RuntimeException exception) {
+                ServerAutoPickupMod.LOGGER.warn("Invalid blacklisted item id: {}", raw);
             }
         }
 
         ModConfig.cacheBlacklist = Collections.unmodifiableSet(resolved);
-
         ServerAutoPickupMod.LOGGER.info(
                 "Blacklist cache rebuilt with {} item(s)",
                 ModConfig.cacheBlacklist.size()
         );
-    }
-
-    private static String extractRegistryName(ResourceKey<Item> key) {
-        String text = key.toString();
-
-        // Typical format:
-        // ResourceKey[minecraft:item / minecraft:dirt]
-        int slash = text.indexOf(" / ");
-        int end = text.lastIndexOf(']');
-
-        if (slash == -1 || end == -1 || slash + 3 >= end) {
-            ServerAutoPickupMod.LOGGER.warn("Could not parse registry key: {}", text);
-            return null;
-        }
-
-        return text.substring(slash + 3, end).trim().toLowerCase();
     }
 
     public static boolean isBlacklisted(ItemStack stack) {
