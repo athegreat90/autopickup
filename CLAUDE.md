@@ -4,22 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2 / NeoForge 26.1.2.77, Java 25.
+A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2 / NeoForge 26.1.2.109, Java 25.
 
 ## Build & run commands
 
-Use the Gradle wrapper (`gradlew.bat` on Windows, `./gradlew` in bash) for everything — there is no separate lint/test tooling configured beyond what Gradle/NeoForge provide.
+Use the Gradle wrapper (`gradlew.bat` on Windows, `./gradlew` in bash) for everything — there is no separate lint tooling configured beyond what Gradle/NeoForge provide.
 
 - `gradlew build` — full build (compiles, runs `generateModMetadata`, packages the mod jar).
 - `gradlew --refresh-dependencies` — refresh dependency cache if the IDE reports missing libraries.
 - `gradlew clean` — reset build outputs without touching source.
 - `gradlew runServer` — launch a dedicated server run configuration with this mod loaded (`--nogui`).
 - `gradlew runGameTestServer` — launch `GameTestServer` and run registered gametests (crashes if none are registered; there are currently none).
+- `gradlew test` — run the JUnit 5 unit tests. ModDevGradle's `unitTest` integration runs them inside the NeoForge environment (FMLLoader + Bootstrap), which tests touching Minecraft registries such as `BlacklistHelperTest` need. `gradlew build` also runs them.
 - `gradlew runData` — run the data generator (client data), reading from `src/main/resources` and writing to `src/generated/resources`.
 
-There are no unit tests in this repo currently; correctness is exercised via the in-game runs above.
+Beyond the unit tests (see Testing), correctness is exercised via the in-game runs above.
 
-CI (`.github/workflows/build.yml`) runs `./gradlew build` on JDK 21 for every push/PR.
+CI (`.github/workflows/build.yml`) runs `./gradlew build` on JDK 25 (Temurin) for every push/PR, matching the Java 25 toolchain required by `build.gradle` (`java.toolchain.languageVersion = 25`).
+
+## Testing
+
+Unit tests live in `src/test/java/de/alexandermora/autopickupmod/` (JUnit 5.11.4, Mockito 5.14.2). `build.gradle` adds `sourceSets.test` to the mod's `neoForge.mods` entry and enables `unitTest` with `testedMod`, which is what makes `test` run inside the NeoForge environment.
+
+- `BlacklistHelperTest` — `isBlacklisted` and `rebuildCacheFromList` (null, blank, malformed, unknown and known ids); bootstraps Minecraft registries.
+- `ConfigEventsTest` — events for a different config spec must not touch the caches.
+- `ModConfigTest` — default cache values (range 5.0, empty immutable blacklist).
+- `PickupEventsTest` — `onEntityTick` for non-player/client-side entities, blacklisted items, full/partial pickup, full inventory, no nearby items.
+- `ServerAutoPickupModTest` — the `MODID` constant.
+
+Mockito uses the inline mock maker (`src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`) so final Minecraft types (`ItemStack`) and methods (`Entity#discard`) can be mocked. The `test` task in `build.gradle` passes `-XX:+EnableDynamicAgentLoading` and `-Dnet.bytebuddy.experimental=true` so ByteBuddy works on Java 25; keep these when changing test config.
 
 ## Architecture
 

@@ -16,7 +16,10 @@ public final class BlacklistHelper {
     private BlacklistHelper() {}
 
     public static void rebuildCache() {
-        List<? extends String> configured = ModConfig.BLACKLISTED_ITEMS.get();
+        rebuildCacheFromList(ModConfig.BLACKLISTED_ITEMS.get());
+    }
+
+    static void rebuildCacheFromList(List<? extends String> configured) {
         Set<Item> resolved = new HashSet<>();
 
         for (var raw : configured) {
@@ -49,6 +52,10 @@ public final class BlacklistHelper {
     }
 
     public static boolean isBlacklisted(ItemStack stack) {
-        return !stack.isEmpty() && ModConfig.cacheBlacklist.contains(stack.getItem());
+        return !stack.isEmpty() && isBlacklisted(stack.getItem());
+    }
+
+    static boolean isBlacklisted(Item item) {
+        return ModConfig.cacheBlacklist.contains(item);
     }
 }

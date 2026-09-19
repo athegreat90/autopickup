@@ -41,7 +41,6 @@ neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
 
-
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -95,7 +94,15 @@ neoForge {
         // multi mod projects should define one per mod
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.test)
         }
+    }
+
+    // Unit tests run inside the NeoForge environment (FMLLoader + Bootstrap).
+    // Run them with: ./gradlew test
+    unitTest {
+        enable()
+        testedMod = mods.getByName(mod_id)
     }
 }
 
@@ -104,10 +111,16 @@ neoForge {
 // a dependency that will be present for runtime testing but that is
 // "optional", meaning it will not be pulled by dependents of this mod.
 configurations {
+    testCompileClasspath.extendsFrom(configurations.modDevCompileDependencies)
+    testRuntimeClasspath.extendsFrom(configurations.modDevRuntimeDependencies)
     runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -170,6 +183,15 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+test {
+    useJUnitPlatform()
+    // Mockito's inline mock maker (see src/test/resources/mockito-extensions) needs to mock final
+    // Minecraft types (e.g. ItemStack) and final methods (e.g. Entity#discard).
+    // -XX:+EnableDynamicAgentLoading lets it self-attach its ByteBuddy agent on JDK 21+.
+    // net.bytebuddy.experimental allows ByteBuddy to instrument the newer Java 25 class format.
+    jvmArgs '-XX:+EnableDynamicAgentLoading', '-Dnet.bytebuddy.experimental=true'
 }
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.

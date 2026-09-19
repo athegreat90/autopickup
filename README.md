@@ -1,25 +1,57 @@
+# Auto Pickup Mod
 
-Installation information
-=======
+A server-side [NeoForge](https://neoforged.net/) mod that automatically pulls nearby dropped items into a
+player's inventory. Pickup range and an item blacklist are configurable.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+Pickup logic runs on **dedicated servers only**. Players do not need the mod installed on their client.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+## Requirements
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+| Component | Version    |
+|-----------|------------|
+| Minecraft | 26.1.2     |
+| NeoForge  | 26.1.2.109 |
+| Java      | 25         |
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+## Installation
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+1. Build the mod (see below) or download the jar.
+2. Place the jar in your server's `mods/` folder.
+3. Start the server. The config file is generated on first launch.
+
+## Configuration
+
+The config file is `config/autopickup/autopickup-server.toml`. It is reloaded when the file changes, so a
+restart is not needed.
+
+| Key                         | Default             | Description                                                                       |
+|-----------------------------|---------------------|-----------------------------------------------------------------------------------|
+| `general.pickup_range`      | `5.0`               | Distance in blocks (0.5 to 16.0) around the player within which items are picked up. |
+| `general.blacklisted_items` | `["minecraft:dirt"]` | Item ids (`namespace:path`) that are never auto-picked up. Unknown ids are logged and skipped. |
+
+Items that do not fit in the inventory are left in the world; a partially fitting stack is picked up as far as
+it fits.
+
+## Building and testing
+
+Use the Gradle wrapper (`gradlew.bat` on Windows, `./gradlew` elsewhere):
+
+- `gradlew build` — compile and package the mod jar.
+- `gradlew test` — run the JUnit 5 unit tests inside the NeoForge environment (also part of `build`).
+- `gradlew runServer` — start a dedicated server with the mod loaded.
+- `gradlew --refresh-dependencies` — refresh the dependency cache if your IDE reports missing libraries.
+- `gradlew clean` — reset build outputs without touching source.
+
+## Mapping names
+
+The project uses the official Mojang mapping names for methods and fields in the Minecraft codebase. These names
+are covered by a specific license; see https://github.com/NeoForged/NeoForm/blob/main/Mojang.md.
+
+## Additional resources
+
+- Community documentation: https://docs.neoforged.net/
+- NeoForged Discord: https://discord.neoforged.net/
+
+## License
+
+All Rights Reserved.
