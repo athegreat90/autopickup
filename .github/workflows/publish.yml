@@ -37,5 +37,7 @@ jobs:
           version-type: ${{ github.event.release.prerelease && 'beta' || 'release' }}
           changelog: ${{ github.event.release.body }}
           loaders: neoforge
-          game-versions: 26.1.2-26.2
+          game-versions: |
+            26.1.2
+            26.2
           java: 25
