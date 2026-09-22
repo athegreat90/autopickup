@@ -42,6 +42,16 @@ Use the Gradle wrapper (`gradlew.bat` on Windows, `./gradlew` elsewhere):
 - `gradlew --refresh-dependencies` — refresh the dependency cache if your IDE reports missing libraries.
 - `gradlew clean` — reset build outputs without touching source.
 
+## Publishing
+
+Publishing a [GitHub Release](../../releases) automatically builds the mod and uploads the jar to
+[Modrinth](https://modrinth.com/project/autopickup-athegreat90) via `.github/workflows/publish.yml`.
+
+- The release's tag name and title become the Modrinth version number and name.
+- The release body is reused as the Modrinth changelog.
+- Marking the GitHub Release as a **pre-release** publishes it to Modrinth as a `beta` version; otherwise it
+  publishes as `release`.
+
 ## Mapping names
 
 The project uses the official Mojang mapping names for methods and fields in the Minecraft codebase. These names
