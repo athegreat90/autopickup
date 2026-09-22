@@ -7,11 +7,11 @@ Pickup logic runs on **dedicated servers only**. Players do not need the mod ins
 
 ## Requirements
 
-| Component | Version    |
-|-----------|------------|
-| Minecraft | 26.1.2     |
-| NeoForge  | 26.1.2.109 |
-| Java      | 25         |
+| Component | Version              |
+|-----------|-----------------------|
+| Minecraft | 26.1.2–26.2           |
+| NeoForge  | 26.1.2.109–26.2.0.88  |
+| Java      | 25                    |
 
 ## Installation
 
