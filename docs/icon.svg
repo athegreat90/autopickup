@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" shape-rendering="crispEdges" role="img" aria-labelledby="title desc">
+  <title id="title">Auto Pickup Mod</title>
+  <desc id="desc">A coral-red pixel-art magnet pulling a turquoise diamond, a gold block, and an iron block into its field on a dark blue tile.</desc>
+
+  <!-- Stepped tile silhouette and inset frame. -->
+  <polygon fill="#0b1221" points="6,0 58,0 58,2 62,2 62,6 64,6 64,58 62,58 62,62 58,62 58,64 6,64 6,62 2,62 2,58 0,58 0,6 2,6 2,2 6,2"/>
+  <polygon fill="#304963" points="7,3 57,3 57,5 59,5 59,7 61,7 61,57 59,57 59,59 57,59 57,61 7,61 7,59 5,59 5,57 3,57 3,7 5,7 5,5 7,5"/>
+  <polygon fill="#15263b" points="8,5 56,5 56,7 59,7 59,56 56,56 56,59 8,59 8,57 5,57 5,8 8,8"/>
+  <polygon fill="#1c3248" points="8,5 56,5 56,7 59,7 59,26 51,26 51,23 43,23 43,20 21,20 21,23 13,23 13,26 5,26 5,8 8,8"/>
+
+  <!-- Sparse pixel glints. -->
+  <rect x="10" y="10" width="2" height="2" fill="#4d748c"/>
+  <rect x="50" y="9" width="2" height="2" fill="#4d748c"/>
+  <rect x="8" y="40" width="2" height="2" fill="#304963"/>
+  <rect x="53" y="45" width="2" height="2" fill="#304963"/>
+  <polygon fill="#a5fff0" points="42,8 44,8 44,10 46,10 46,12 44,12 44,14 42,14 42,12 40,12 40,10 42,10"/>
+
+  <!-- Dropped gold block. -->
+  <polygon fill="#0b1221" points="8,19 15,15 23,19 23,28 16,32 8,28"/>
+  <polygon fill="#ffe493" points="9,20 15,17 21,20 15,23"/>
+  <polygon fill="#edac3d" points="9,20 15,23 15,30 9,27"/>
+  <polygon fill="#b8742e" points="15,23 21,20 21,27 15,30"/>
+  <polygon fill="#fff4c4" points="10,20 15,18 18,20 15,21"/>
+
+  <!-- Floating diamond, with contrasting pixel-cut facets. -->
+  <polygon fill="#0b1221" points="27,8 37,8 37,10 40,10 40,16 38,16 38,19 35,19 35,22 33,22 33,24 31,24 31,22 29,22 29,19 26,19 26,16 24,16 24,10 27,10"/>
+  <polygon fill="#63f2dd" points="28,10 36,10 36,12 38,12 38,15 35,18 32,21 29,18 26,15 26,12 28,12"/>
+  <polygon fill="#cefff4" points="28,10 32,10 30,14 26,14 26,12 28,12"/>
+  <polygon fill="#26b7b4" points="34,10 36,10 36,12 38,12 38,15 32,21 34,15"/>
+  <polygon fill="#37d6c5" points="26,15 30,15 32,21"/>
+  <polygon fill="#93ffeb" points="30,15 34,15 32,21"/>
+
+  <!-- Dropped iron block. -->
+  <polygon fill="#0b1221" points="43,20 50,16 57,20 57,28 50,32 43,28"/>
+  <polygon fill="#f0f7fc" points="44,21 50,18 55,21 50,24"/>
+  <polygon fill="#b8d0df" points="44,21 50,24 50,30 44,27"/>
+  <polygon fill="#6689a4" points="50,24 55,21 55,27 50,30"/>
+
+  <!-- Inward motion marks and a small downward pickup arrow. -->
+  <polygon fill="#62ccce" points="11,33 13,33 13,35 15,35 15,38 13,38 13,36 11,36"/>
+  <polygon fill="#62ccce" points="51,33 53,33 53,36 51,36 51,38 49,38 49,35 51,35"/>
+  <rect x="31" y="26" width="2" height="3" fill="#478c9e"/>
+  <polygon fill="#91f6df" points="31,31 33,31 33,35 36,35 36,37 34,37 34,39 30,39 30,37 28,37 28,35 31,35"/>
+
+  <!-- Magnet shadow and dark outline. -->
+  <polygon fill="#0b1221" points="17,29 27,29 27,44 29,44 29,46 37,46 37,44 39,44 39,29 49,29 49,49 47,49 47,53 43,53 43,57 25,57 25,55 21,55 21,51 17,51"/>
+  <polygon fill="#8e3449" points="19,32 27,32 27,46 29,46 29,48 37,48 37,46 41,46 41,32 47,32 47,49 45,49 45,53 41,53 41,55 25,55 25,53 21,53 21,49 19,49"/>
+
+  <!-- Red horseshoe body, silver poles, and blocky highlights. -->
+  <polygon fill="#f26367" points="18,37 26,37 26,45 29,45 29,48 35,48 35,45 38,45 38,37 46,37 46,47 44,47 44,51 40,51 40,53 24,53 24,51 20,51 20,47 18,47"/>
+  <polygon fill="#c94155" points="42,37 46,37 46,47 44,47 44,51 40,51 40,53 24,53 24,51 39,51 39,49 42,49"/>
+  <rect x="18" y="37" width="2" height="9" fill="#ff9a88"/>
+  <rect x="20" y="46" width="2" height="3" fill="#ff9a88"/>
+  <rect x="24" y="49" width="10" height="2" fill="#ff9a88"/>
+  <rect x="38" y="37" width="2" height="7" fill="#ff9a88"/>
+  <rect x="18" y="30" width="8" height="7" fill="#dcecf4"/>
+  <rect x="18" y="30" width="8" height="2" fill="#ffffff"/>
+  <rect x="24" y="32" width="2" height="5" fill="#8dacc2"/>
+  <rect x="38" y="30" width="8" height="7" fill="#dcecf4"/>
+  <rect x="38" y="30" width="8" height="2" fill="#ffffff"/>
+  <rect x="44" y="32" width="2" height="5" fill="#8dacc2"/>
+</svg>
