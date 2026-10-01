@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.147'
     id 'idea'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.20'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -28,6 +29,11 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+
+    // KotlinLangForge - Kotlin language adapter for NeoForge.
+    maven {
+        url 'https://repo.nyon.dev/releases'
+    }
 }
 
 base {
@@ -36,6 +42,10 @@ base {
 
 // Minecraft 26.1.2 through 26.2 ships with Java 25, so mods should target Java 25.
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+kotlin {
+    jvmToolchain(25)
+}
 
 neoForge {
     // Specify the version of NeoForge to use.
@@ -117,6 +127,9 @@ configurations {
 }
 
 dependencies {
+    // KotlinLangForge - Kotlin language adapter for NeoForge (language provider 3.1 covers MC 1.21.9-26.x).
+    implementation 'dev.nyon:KotlinLangForge:2.14.1-k2.4.20-3.1+neoforge'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testImplementation 'org.mockito:mockito-core:5.14.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

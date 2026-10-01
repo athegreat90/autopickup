@@ -1,3 +1,5 @@
+modLoader="klf"
+loaderVersion="[1,)"
 license="${mod_license}"
 
 [[mods]]
