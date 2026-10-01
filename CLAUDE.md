@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2–26.2 / NeoForge 26.1.2.109–26.2.0.88 (built against 26.2), Java 25.
+A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2–26.2 / NeoForge 26.1.2.109–26.2.0.88 (built against 26.2), Java 25. Written in Kotlin, loaded via the [KotlinLangForge](https://modrinth.com/mod/kotlin-lang-forge) (KLF) language adapter (`modLoader="klf"` in `neoforge.mods.toml`).
 
 ## Build & run commands
 
@@ -24,7 +24,7 @@ CI (`.github/workflows/build.yml`) runs `./gradlew build` on JDK 25 (Temurin) fo
 
 ## Testing
 
-Unit tests live in `src/test/java/de/alexandermora/autopickupmod/` (JUnit 5.11.4, Mockito 5.14.2). `build.gradle` adds `sourceSets.test` to the mod's `neoForge.mods` entry and enables `unitTest` with `testedMod`, which is what makes `test` run inside the NeoForge environment.
+Unit tests live in `src/test/kotlin/de/alexandermora/autopickupmod/` (JUnit 5.11.4, Mockito 5.14.2, called from Kotlin with plain `org.mockito.Mockito` — no `mockito-kotlin`). `build.gradle` adds `sourceSets.test` to the mod's `neoForge.mods` entry and enables `unitTest` with `testedMod`, which is what makes `test` run inside the NeoForge environment.
 
 - `BlacklistHelperTest` — `isBlacklisted` and `rebuildCacheFromList` (null, blank, malformed, unknown and known ids); bootstraps Minecraft registries.
 - `ConfigEventsTest` — events for a different config spec must not touch the caches.
@@ -36,11 +36,11 @@ Mockito uses the inline mock maker (`src/test/resources/mockito-extensions/org.m
 
 ## Architecture
 
-This is a small, server-only mod (`side="BOTH"` in the mod metadata, but pickup logic is registered only on `Dist.DEDICATED_SERVER`). Everything lives under `src/main/java/de/alexandermora/autopickupmod/`:
+This is a small, server-only mod (`side="BOTH"` in the mod metadata, but pickup logic is registered only on `Dist.DEDICATED_SERVER`). Everything lives under `src/main/kotlin/de/alexandermora/autopickupmod/`. `ModConfig`, `ConfigEvents`, `BlacklistHelper`, and `PickupEvents` are Kotlin `object`s (singletons); NeoForge event buses are registered with the singleton directly (e.g. `modBus.register(ConfigEvents)`), not a `Class` token:
 
 - **`ServerAutoPickupMod`** — the `@Mod` entry point (common/all-dist). Creates the `config/autopickup/` directory and registers the server config spec (`ModConfig.SPEC`) as `autopickup/autopickup-server.toml`. Registers `ConfigEvents` on the mod event bus.
 - **`ServerAutoPickupDedicatedServer`** — a second `@Mod`-annotated class scoped to `Dist.DEDICATED_SERVER` only. This is where `PickupEvents` gets registered onto `NeoForge.EVENT_BUS` (the game event bus, as opposed to the mod event bus) — so pickup logic only runs on a dedicated server, not in-process on integrated/singleplayer.
-- **`ModConfig`** — defines the `ModConfigSpec` (pickup range as a bounded double, blacklisted items as a string list of `namespace:path` ids). Also holds two `volatile` runtime caches (`cachedPickupRange`, `cacheBlacklist`) that are read on every tick — these are populated by `ConfigEvents`/`BlacklistHelper`, not read directly from the `ModConfigSpec` values, to avoid the cost of resolving config on the hot path.
+- **`ModConfig`** — defines the `ModConfigSpec` (pickup range as a bounded double, blacklisted items as a string list of `namespace:path` ids). Also holds two `@Volatile` runtime caches (`cachedPickupRange`, `cacheBlacklist`) that are read on every tick — these are populated by `ConfigEvents`/`BlacklistHelper`, not read directly from the `ModConfigSpec` values, to avoid the cost of resolving config on the hot path.
 - **`ConfigEvents`** — listens for `ModConfigEvent.Loading`/`Reloading` on `ModConfig.SPEC` specifically, and refreshes the two caches above (`ModConfig.cachedPickupRange`, and `BlacklistHelper.rebuildCache()`).
 - **`BlacklistHelper`** — resolves the configured blacklist strings into `Item` instances via `BuiltInRegistries.ITEM`, logging and skipping unknown/invalid ids. Populates `ModConfig.cacheBlacklist`. `isBlacklisted(ItemStack)` is the hot-path check used per item.
 - **`PickupEvents`** — the core loop, subscribed to `EntityTickEvent.Post`. For each server-side player tick: builds an AABB around the player inflated by `ModConfig.cachedPickupRange`, queries nearby non-empty `ItemEntity`s without pickup delay, skips blacklisted items, and inserts into the player's inventory — discarding the item entity on full pickup or updating its stack on partial pickup.
