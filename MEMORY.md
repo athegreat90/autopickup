@@ -39,3 +39,7 @@ Record of why the repo's branches and the mod's source language changed, for fut
   `BlacklistHelper.rebuildCacheFromList` (skips unknown/invalid blacklist ids) and
   `ServerAutoPickupMod`'s config-folder creation (logs and continues into config registration on failure
   instead of crashing mod startup).
+- `.github/workflows/publish.yml` now declares a required Modrinth dependency on `kotlin-lang-forge`
+  (KLF's own Modrinth project) via mc-publish's `dependencies` input — since the mod only `implementation`s
+  the KLF jar rather than `jarJar`-embedding it, players installing from Modrinth need KLF installed
+  separately or the mod won't load.

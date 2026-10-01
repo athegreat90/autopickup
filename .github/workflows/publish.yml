@@ -43,3 +43,5 @@ jobs:
             26.2
           game-version-filter: none
           java: 25
+          dependencies: |
+            kotlin-lang-forge(required){modrinth:kotlin-lang-forge}
