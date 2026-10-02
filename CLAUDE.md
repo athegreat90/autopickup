@@ -36,7 +36,7 @@ Mockito uses the inline mock maker (`src/test/resources/mockito-extensions/org.m
 
 ## Architecture
 
-This is a small, server-only mod (`side="BOTH"` in the mod metadata, but pickup logic is registered only on `Dist.DEDICATED_SERVER`). Everything lives under `src/main/kotlin/de/alexandermora/autopickupmod/`. `ModConfig`, `ConfigEvents`, `BlacklistHelper`, and `PickupEvents` are Kotlin `object`s (singletons); NeoForge event buses are registered with the singleton directly (e.g. `modBus.register(ConfigEvents)`), not a `Class` token:
+This is a small, server-only mod (`side="SERVER"` in the mod metadata, and pickup logic is registered only on `Dist.DEDICATED_SERVER`). Everything lives under `src/main/kotlin/de/alexandermora/autopickupmod/`. `ModConfig`, `ConfigEvents`, `BlacklistHelper`, and `PickupEvents` are Kotlin `object`s (singletons); NeoForge event buses are registered with the singleton directly (e.g. `modBus.register(ConfigEvents)`), not a `Class` token:
 
 - **`ServerAutoPickupMod`** — the `@Mod` entry point (common/all-dist). Creates the `config/autopickup/` directory and registers the server config spec (`ModConfig.SPEC`) as `autopickup/autopickup-server.toml`. Registers `ConfigEvents` on the mod event bus.
 - **`ServerAutoPickupDedicatedServer`** — a second `@Mod`-annotated class scoped to `Dist.DEDICATED_SERVER` only. This is where `PickupEvents` gets registered onto `NeoForge.EVENT_BUS` (the game event bus, as opposed to the mod event bus) — so pickup logic only runs on a dedicated server, not in-process on integrated/singleplayer.
