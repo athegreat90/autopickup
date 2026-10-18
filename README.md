@@ -50,6 +50,8 @@ the patch version in `gradle.properties`, creates a [GitHub Release](../../relea
 `.github/workflows/publish.yml`. To release a new minor/major version, set `mod_version` to an unreleased
 version and push; it is released as is. Publishing a GitHub Release by hand also publishes it to Modrinth.
 
+- The jar is built once, after the version bump, attached to the GitHub Release, and that same file is uploaded to
+  Modrinth. A version that already exists on Modrinth is rejected before upload.
 - The release's tag name and title become the Modrinth version number and name.
 - The release body is reused as the Modrinth changelog.
 - Marking the GitHub Release as a **pre-release** publishes it to Modrinth as a `beta` version; otherwise it
