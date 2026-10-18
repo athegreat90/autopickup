@@ -1,0 +1,35 @@
+name: Create release
+
+on:
+  push:
+    branches: [26]
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read mod version
+        id: version
+        run: echo "value=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      # A PAT is required: releases created with GITHUB_TOKEN do not trigger publish.yml.
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $VERSION already exists, skipping."
+          else
+            gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
+          fi
