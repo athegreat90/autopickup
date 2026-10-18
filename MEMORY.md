@@ -21,10 +21,11 @@ Record of why the repo's branches and the mod's source language changed, for fut
   `gradle.properties` change, and on manual `workflow_dispatch`. It reads
   `mod_version` from `gradle.properties` and creates a GitHub release with that tag only if none exists yet, so
   `mod_version` must be bumped for each release.
-- The release is created with a personal access token (`RELEASE_PAT` secret), not `GITHUB_TOKEN`: releases
-  created with `GITHUB_TOKEN` do not trigger other workflows, so `publish.yml` would never run.
-- `.github/workflows/publish.yml` remains the single place that publishes to Modrinth, triggered by
-  `release: published` (so manually created releases publish too). Pre-releases are published as `beta`.
+- The release is created with the default `GITHUB_TOKEN` (no PAT needed). Because such releases do not trigger
+  other workflows, `release.yml` calls `publish.yml` directly (`workflow_call`) right after creating the release.
+- `.github/workflows/publish.yml` remains the single place that publishes to Modrinth. It runs via
+  `workflow_call` from `release.yml` and on `release: published` (so manually created releases publish too).
+  It reads name, body and pre-release flag from the release itself. Pre-releases are published as `beta`.
 - Keep `game-versions` in `publish.yml` in sync with `minecraft_version_range` in `gradle.properties`
   (`26.3` was added alongside the 26.3 support).
 - Delivery of this automation used short-lived branches merged into `26` through PRs (squash-merged).

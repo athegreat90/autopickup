@@ -9,28 +9,53 @@ on:
       - 'build.gradle'
       - 'gradle.properties'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
+    outputs:
+      created: ${{ steps.create.outputs.created }}
+      tag: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Read mod version
         id: version
-        run: echo "value=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+        run: echo "value=$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')" >> "$GITHUB_OUTPUT"
 
-      # A PAT is required: releases created with GITHUB_TOKEN do not trigger publish.yml.
       - name: Create release if missing
+        id: create
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.value }}
         run: |
           if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             echo "Release $VERSION already exists, skipping."
+            echo "created=false" >> "$GITHUB_OUTPUT"
           else
             gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
+            echo "created=true" >> "$GITHUB_OUTPUT"
           fi
+
+  # Releases created with GITHUB_TOKEN do not trigger `release: published`,
+  # so the publish workflow is called directly instead of through a PAT.
+  publish:
+    needs: release
+    if: needs.release.outputs.created == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish.yml
+    with:
+      tag_name: ${{ needs.release.outputs.tag }}
+    secrets: inherit
