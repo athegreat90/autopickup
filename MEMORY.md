@@ -15,6 +15,20 @@ Record of why the repo's branches and the mod's source language changed, for fut
 - ModDevGradle plugin (2.0.147) remains compatible.
 - No code changes were required; compatibility verified through `./gradlew build` and `./gradlew runServer`.
 
+## Release automation
+
+- `.github/workflows/release.yml` ("Create release") runs on push to `26` when `src/**`, `build.gradle` or
+  `gradle.properties` change, and on manual `workflow_dispatch`. It reads
+  `mod_version` from `gradle.properties` and creates a GitHub release with that tag only if none exists yet, so
+  `mod_version` must be bumped for each release.
+- The release is created with a personal access token (`RELEASE_PAT` secret), not `GITHUB_TOKEN`: releases
+  created with `GITHUB_TOKEN` do not trigger other workflows, so `publish.yml` would never run.
+- `.github/workflows/publish.yml` remains the single place that publishes to Modrinth, triggered by
+  `release: published` (so manually created releases publish too). Pre-releases are published as `beta`.
+- Keep `game-versions` in `publish.yml` in sync with `minecraft_version_range` in `gradle.properties`
+  (`26.3` was added alongside the 26.3 support).
+- Delivery of this automation used short-lived branches merged into `26` through PRs (squash-merged).
+
 ## Branch consolidation
 
 - The repo moved from three branches (`main`, `26.1`, `26.2`) to two: `main` and `26`. `26` was created
