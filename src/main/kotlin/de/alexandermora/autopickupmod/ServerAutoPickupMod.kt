@@ -3,6 +3,7 @@ package de.alexandermora.autopickupmod
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
+import net.neoforged.fml.config.ModConfig.Type
 import net.neoforged.fml.loading.FMLPaths
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,7 +25,7 @@ class ServerAutoPickupMod(modBus: IEventBus, modContainer: ModContainer) {
 
         // Register server config. In NeoForge 26.3+, Type enum was refactored.
         // Using values()[0] which corresponds to the default server config type.
-        val serverConfigType = net.neoforged.fml.config.ModConfig.Type.values().firstOrNull()
+        val serverConfigType = Type.entries.firstOrNull()
         if (serverConfigType != null) {
             modContainer.registerConfig(serverConfigType, ModConfig.SPEC, "autopickup/autopickup-server.toml")
         } else {
