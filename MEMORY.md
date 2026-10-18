@@ -18,14 +18,18 @@ Record of why the repo's branches and the mod's source language changed, for fut
 ## Release automation
 
 - `.github/workflows/release.yml` ("Create release") runs on push to `26` when `src/**`, `build.gradle` or
-  `gradle.properties` change, and on manual `workflow_dispatch`. It reads
-  `mod_version` from `gradle.properties` and creates a GitHub release with that tag only if none exists yet, so
-  `mod_version` must be bumped for each release.
-- The release is created with the default `GITHUB_TOKEN` (no PAT needed). Because such releases do not trigger
-  other workflows, `release.yml` calls `publish.yml` directly (`workflow_call`) right after creating the release.
+  `gradle.properties` change, and on manual `workflow_dispatch` (only on `26`). It first runs `./gradlew build`;
+  only if that passes does it release.
+- Versioning: if the `mod_version` in `gradle.properties` has no release/tag yet it is released as is (use this for
+  manual minor/major bumps); otherwise the patch number is bumped automatically and committed to `26` as
+  `chore: release X.Y.Z [skip ci]`, and the release targets that commit.
+- The bump commit and release use the default `GITHUB_TOKEN` (no PAT needed). Because they do not trigger other
+  workflows (no loop), `release.yml` calls `publish.yml` directly (`workflow_call`) after creating the release.
+  This needs `26` to allow pushes from `github-actions` (no branch protection at the time of writing).
 - `.github/workflows/publish.yml` remains the single place that publishes to Modrinth. It runs via
   `workflow_call` from `release.yml` and on `release: published` (so manually created releases publish too).
-  It reads name, body and pre-release flag from the release itself. Pre-releases are published as `beta`.
+  It checks out the release tag and reads name, body and pre-release flag from the release itself.
+  Pre-releases are published as `beta`.
 - Keep `game-versions` in `publish.yml` in sync with `minecraft_version_range` in `gradle.properties`
   (`26.3` was added alongside the 26.3 support).
 - Delivery of this automation used short-lived branches merged into `26` through PRs (squash-merged).

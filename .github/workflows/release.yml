@@ -17,42 +17,77 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    if: github.ref == 'refs/heads/26'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
   release:
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
     outputs:
-      created: ${{ steps.create.outputs.created }}
       tag: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Read mod version
+      # An unreleased mod_version (e.g. a manual minor/major bump) is released as is;
+      # otherwise the patch number is bumped and committed back to the branch.
+      - name: Resolve version and bump if needed
         id: version
-        run: echo "value=$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current="$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')"
+          if ! [[ "$current" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::mod_version '$current' is not strict MAJOR.MINOR.PATCH."
+            exit 1
+          fi
+          next="$current"
+          if gh release view "$current" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 \
+            || git rev-parse -q --verify "refs/tags/$current" > /dev/null; then
+            next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+            sed -i "s/^mod_version=.*/mod_version=$next/" gradle.properties
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: release $next [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+          echo "value=$next" >> "$GITHUB_OUTPUT"
 
-      - name: Create release if missing
-        id: create
+      # Pushes and releases made with GITHUB_TOKEN do not trigger other workflows,
+      # so the publish workflow is called directly below.
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.value }}
         run: |
-          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "Release $VERSION already exists, skipping."
-            echo "created=false" >> "$GITHUB_OUTPUT"
-          else
-            gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
-            echo "created=true" >> "$GITHUB_OUTPUT"
-          fi
+          gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
+            --target "$(git rev-parse HEAD)" --title "$VERSION" --generate-notes
 
-  # Releases created with GITHUB_TOKEN do not trigger `release: published`,
-  # so the publish workflow is called directly instead of through a PAT.
   publish:
     needs: release
-    if: needs.release.outputs.created == 'true'
     permissions:
       contents: read
     uses: ./.github/workflows/publish.yml
