@@ -9,6 +9,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 
+/** Mod entry point: creates the config folder and registers the server config. */
 @Mod(ServerAutoPickupMod.MODID)
 class ServerAutoPickupMod(modBus: IEventBus, modContainer: ModContainer) {
 
