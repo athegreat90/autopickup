@@ -3,7 +3,7 @@ name: Create release
 on:
   workflow_dispatch:
   push:
-    branches: [26]
+    branches: [main]
     paths:
       - 'src/**'
       - 'build.gradle'
@@ -17,13 +17,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Runs first so the jar is built with the final mod_version (the jar name contains it).
+  # Runs first so the jar is built with the final version (the jar name contains it).
+  # Nothing is committed back: the branch is protected, so the version is computed here and
+  # handed to Gradle with -Pmod_version instead.
   version:
-    if: github.ref == 'refs/heads/26'
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: read
     outputs:
       tag: ${{ steps.version.outputs.value }}
       sha: ${{ steps.version.outputs.sha }}
@@ -32,29 +34,33 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      # An unreleased mod_version (e.g. a manual minor/major bump) is released as is;
-      # otherwise the patch number is bumped and committed back to the branch.
-      - name: Resolve version and bump if needed
+      # mod_version in gradle.properties is the base version. An unreleased base (e.g. a manual
+      # minor/major bump) is released as is; otherwise the patch number after the highest
+      # existing MAJOR.MINOR.* tag is used.
+      - name: Resolve version
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          current="$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')"
-          if ! [[ "$current" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            echo "::error::mod_version '$current' is not strict MAJOR.MINOR.PATCH."
+          base="$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')"
+          if ! [[ "$base" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::mod_version '$base' is not strict MAJOR.MINOR.PATCH."
             exit 1
           fi
-          next="$current"
-          if gh release view "$current" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 \
-            || git rev-parse -q --verify "refs/tags/$current" > /dev/null; then
-            next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
-            sed -i "s/^mod_version=.*/mod_version=$next/" gradle.properties
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -am "chore: release $next [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+          prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[3]}"
+          next="$base"
+          if gh release view "$base" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 \
+            || git rev-parse -q --verify "refs/tags/$base" > /dev/null; then
+            latest="$patch"
+            while read -r tag; do
+              [[ "$tag" =~ ^${prefix//./\.}\.([0-9]+)$ ]] || continue
+              (( BASH_REMATCH[1] > latest )) && latest="${BASH_REMATCH[1]}"
+            done < <(git tag --list "$prefix.*")
+            next="$prefix.$((latest + 1))"
           fi
           {
             echo "value=$next"
@@ -87,7 +93,9 @@ jobs:
           validate-wrappers: true
 
       - name: Build with Gradle
-        run: ./gradlew build
+        env:
+          VERSION: ${{ needs.version.outputs.tag }}
+        run: ./gradlew build "-Pmod_version=$VERSION"
 
       - name: Upload jar
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

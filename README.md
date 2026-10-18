@@ -44,11 +44,14 @@ Use the Gradle wrapper (`gradlew.bat` on Windows, `./gradlew` elsewhere):
 
 ## Publishing
 
-Every push to the `26` branch that changes `src/**`, `build.gradle` or `gradle.properties` builds the mod, bumps
-the patch version in `gradle.properties`, creates a [GitHub Release](../../releases) and uploads the jar to
+Every push to the default branch (`main`) that changes `src/**`, `build.gradle` or `gradle.properties` builds the
+mod, creates a [GitHub Release](../../releases) and uploads the jar to
 [Modrinth](https://modrinth.com/project/autopickup-athegreat90) via `.github/workflows/release.yml` and
-`.github/workflows/publish.yml`. To release a new minor/major version, set `mod_version` to an unreleased
-version and push; it is released as is. Publishing a GitHub Release by hand also publishes it to Modrinth.
+`.github/workflows/publish.yml`. `main` is protected, so nothing is committed back: `mod_version` in
+`gradle.properties` is the base version, and the release number is the patch after the highest existing
+`MAJOR.MINOR.*` tag, passed to Gradle as `-Pmod_version`. To release a new minor/major version, set `mod_version`
+to an unreleased version in a pull request; it is released as is. Publishing a GitHub Release by hand also
+publishes it to Modrinth.
 
 - The jar is built once, after the version bump, attached to the GitHub Release, and that same file is uploaded to
   Modrinth. A version that already exists on Modrinth is rejected before upload.
