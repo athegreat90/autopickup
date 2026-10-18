@@ -40,7 +40,7 @@ base {
     archivesName = mod_id
 }
 
-// Minecraft 26.1.2 through 26.2 ships with Java 25, so mods should target Java 25.
+// Minecraft 26.1.2 through 26.3 ships with Java 25, so mods should target Java 25.
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 kotlin {

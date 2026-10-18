@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2–26.2 / NeoForge 26.1.2.109–26.2.0.88 (built against 26.2), Java 25. Written in Kotlin, loaded via the [KotlinLangForge](https://modrinth.com/mod/kotlin-lang-forge) (KLF) language adapter (`modLoader="klf"` in `neoforge.mods.toml`).
+A NeoForge mod for Minecraft (`autopickupmod` / "Auto Pickup Mod") that automatically pulls nearby dropped items into a player's inventory server-side, with a configurable pickup range and item blacklist. Targets Minecraft 26.1.2–26.3 / NeoForge 26.1.2.109–26.3.0.83 (built against 26.3), Java 25. Written in Kotlin, loaded via the [KotlinLangForge](https://modrinth.com/mod/kotlin-lang-forge) (KLF) language adapter (`modLoader="klf"` in `neoforge.mods.toml`).
 
 ## Build & run commands
 
